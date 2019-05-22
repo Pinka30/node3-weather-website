@@ -1,0 +1,107 @@
+Hi guys, below is my code, I have written exactly as shown in the videos. not sure if I missed anything. Request you to let me know if anything else is required from my side.// to run this file use: nodemon src/app.js
+
+const path = require('path') 
+const express = require('express')
+//express is a function here
+const hbs = require('hbs')
+const forecast = require('./utils/forecast')
+const geocode = require('./utils/geocode')
+
+const app = express()
+
+const publicDirectoryPath = path.join(__dirname, '../public')
+const viewsPath = path.join(__dirname, '../templates/views')
+const partialsPath = path.join(__dirname,'../templates/partials')
+
+app.set('view engine','hbs')// to set up handlebars engine
+app.set('views', viewsPath) //set up views location
+hbs.registerPartials(partialsPath)
+
+app.use(express.static(publicDirectoryPath)) // app.use() : way to customise your server
+
+app.get('', (req, res) => {
+    res.render('index', {
+        title: 'Weather App',
+        name:'Andrew Mead'
+    })
+})
+
+app.get('/about',(req,res) => {
+    res.render('about', {
+        title: 'Weather App',
+        name: 'Pinka is Strong'
+    })
+})
+
+app.get('/help',(req,res) => {
+    res.render('help', {
+        title: 'Help',
+        name: 'Pinka is very Strong'
+    })
+})
+
+app.get('/weather',(req,res) => {
+    if(!req.query.address){
+        return res.send({
+            error: 'You must provide an address here'
+        })
+    }
+
+/* ..............................Start */ 
+
+    geocode(req.query.address, (error, { latitude, longitude, location } = {}) =>{
+        if(error){
+           
+        return res.send({ error })
+        }
+
+        forecast(latitude, longitude, (error, forecastData) => {
+            if(error){
+                return res.send({ error })
+            }
+            
+            res.send({
+                forecast: 'It is snowing', // PROBLEM AREA: Instead of the static value if I pass in forecastData here, it shows value in the console but browser times out  
+                location, //using shorthand method as the variable name is same as the value 
+                address: req.query.address
+            })
+        })
+    })
+/* ..............................End .................localhost:3000/weather?address=boston*/     
+    
+})
+
+app.get('/products', (req,res) => {
+
+    if(!req.query.search){
+        return res.send({ //by using return we are stopping the function execution right here
+            error: 'You must provide a search term'
+        })
+    }
+    console.log(req.query.search)
+    res.send({
+        products: []
+    })
+})
+
+app.get('/help/*',(req,res) => {
+   
+    res.render('404',{
+        title: 'Help 404',
+        name: 'Pinka',
+        errorMessage: 'Help article not found'
+    })
+})
+
+app.get('*',(req,res) => { 
+  
+   res.render('404',{
+        title: '404',
+        name: 'Pinka',
+        errorMessage: 'Page not found'
+   })
+})
+
+app.listen(3000, () => {
+    console.log("Server is up on port 3000")
+})
