@@ -11,6 +11,8 @@ const geocode = require('./utils/geocode')
 //console.log(path.join(__dirname, '../public'))  --nln
 
 const app = express()
+//process.env.PORT value will be used by heroku and 3000 will be used locally
+const port = process.env.PORT || 3000
 
 //Define paths for Express config
 //dirname points to source
@@ -187,6 +189,6 @@ a special name which means that this is never actually going to run.*/
 //app.com/help
 //app.com/about
 
-app.listen(3000, () => {
-    console.log("Server is up on port 3000")
+app.listen(port, () => {
+    console.log("Server is up on port " + port)
 })
